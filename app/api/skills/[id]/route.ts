@@ -151,11 +151,12 @@ const mockSkills = [
 // GET /api/skills/[id] - Fetch single skill
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
-    const skill = mockSkills.find(s => s.id === id);
+    const { id } = await params;
+    const skillId = parseInt(id);
+    const skill = mockSkills.find(s => s.id === skillId);
 
     if (!skill) {
       return NextResponse.json(
@@ -177,11 +178,12 @@ export async function GET(
 // PUT /api/skills/[id] - Update skill
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
-    const skillIndex = mockSkills.findIndex(s => s.id === id);
+    const { id } = await params;
+    const skillId = parseInt(id);
+    const skillIndex = mockSkills.findIndex(s => s.id === skillId);
 
     if (skillIndex === -1) {
       return NextResponse.json(
@@ -229,11 +231,12 @@ export async function PUT(
 // DELETE /api/skills/[id] - Delete skill
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
-    const skillIndex = mockSkills.findIndex(s => s.id === id);
+    const { id } = await params;
+    const skillId = parseInt(id);
+    const skillIndex = mockSkills.findIndex(s => s.id === skillId);
 
     if (skillIndex === -1) {
       return NextResponse.json(
