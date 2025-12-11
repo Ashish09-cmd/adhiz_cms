@@ -8,7 +8,7 @@ import RichTextEditor from "@/components/ui/Editor";
 const AddSkillPage: React.FC = () => {
   const [formData, setFormData] = useState({
     title: "",
-    priority: 1,
+    priority:"",
     description: "",
     slug: "",
     seo_title: "",
