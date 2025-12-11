@@ -186,37 +186,17 @@ const EditSkillPage: React.FC = () => {
         <div className="flex items-center gap-4">
           <button
             onClick={handleCancel}
-            className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="text-gray-800 cursor-pointer hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100 transition-colors"
             title="Back to Skills List"
           >
             <Icon icon="heroicons:arrow-left-20-solid" className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 font-poppins">Edit Skill</h1>
-            {originalData && (
+            <h1 className="text-md font-bold text-gray-900 font-poppins">Edit Skill</h1>
+            {/* {originalData && (
               <p className="text-sm text-gray-600 mt-1">Editing: {originalData.title}</p>
-            )}
+            )} */}
           </div>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={handleCancel}
-            disabled={loading}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="submit"
-            variant="primary"
-            disabled={loading || !hasChanges()}
-            className="flex items-center gap-2"
-            onClick={handleSubmit}
-          >
-            {loading && <Icon icon="heroicons:arrow-path-20-solid" className="w-4 h-4 animate-spin" />}
-            {loading ? 'Updating...' : 'Update Skill'}
-          </Button>
         </div>
       </div>
 
@@ -241,6 +221,7 @@ const EditSkillPage: React.FC = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Title */}
+            <div className='flex flex-col gap-4'>
             <div className="md:col-span-2">
               <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                 Title <span className="text-red-500">*</span>
@@ -252,7 +233,7 @@ const EditSkillPage: React.FC = () => {
                 value={formData.title}
                 onChange={handleInputChange}
                 required
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2  transition-colors ${
                   formErrors.title ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
                 }`}
                 placeholder="Enter skill title"
@@ -275,14 +256,14 @@ const EditSkillPage: React.FC = () => {
                 onChange={handleInputChange}
                 min="1"
                 max="10"
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 transition-colors ${
                   formErrors.priority ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
                 }`}
               />
               {formErrors.priority && (
                 <p className="mt-1 text-sm text-red-600">{formErrors.priority}</p>
               )}
-              <p className="mt-1 text-xs text-gray-500">Priority level (1-10, higher numbers indicate higher priority)</p>
+              <p className="mt-2 text-xs font-regular text-error italic">Priority level (1-10, higher numbers indicate higher priority)</p>
             </div>
 
             {/* Slug */}
@@ -297,7 +278,7 @@ const EditSkillPage: React.FC = () => {
                 value={formData.slug}
                 onChange={handleInputChange}
                 required
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2  transition-colors ${
                   formErrors.slug ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
                 }`}
                 placeholder="javascript-fundamentals"
@@ -307,8 +288,7 @@ const EditSkillPage: React.FC = () => {
               )}
               <p className="mt-1 text-xs text-gray-500">URL-friendly identifier (lowercase, numbers, hyphens only)</p>
             </div>
-          </div>
-
+             
           {/* Description */}
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
@@ -321,7 +301,7 @@ const EditSkillPage: React.FC = () => {
               onChange={handleInputChange}
               required
               rows={4}
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2  transition-colors ${
                 formErrors.description ? 'border-red-300 focus:ring-red-500' : 'border-gray-300'
               }`}
               placeholder="Enter detailed skill description"
@@ -330,7 +310,9 @@ const EditSkillPage: React.FC = () => {
               <p className="mt-1 text-sm text-red-600">{formErrors.description}</p>
             )}
           </div>
+          </div>
 
+          <div>
           {/* SEO Section */}
           <div className="border-t pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">SEO Settings</h3>
@@ -346,7 +328,7 @@ const EditSkillPage: React.FC = () => {
                   name="seo_title"
                   value={formData.seo_title}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2  transition-colors"
                   placeholder="Enter SEO title"
                 />
                 <p className="mt-1 text-xs text-gray-500">Title that appears in search engine results (leave empty to use main title)</p>
@@ -363,7 +345,7 @@ const EditSkillPage: React.FC = () => {
                   value={formData.seo_description}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2  transition-colors"
                   placeholder="Enter SEO description"
                 />
                 <p className="mt-1 text-xs text-gray-500">Description that appears in search engine results</p>
@@ -380,13 +362,35 @@ const EditSkillPage: React.FC = () => {
                   name="seo_keywords"
                   value={formData.seo_keywords}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2  transition-colors"
                   placeholder="keyword1, keyword2, keyword3"
                 />
                 <p className="mt-1 text-xs text-gray-500">Comma-separated keywords for search optimization</p>
               </div>
             </div>
+           </div>
           </div>
+          </div>
+          <div className="flex items-center justify-end gap-2">
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={handleCancel}
+            disabled={loading}
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={loading || !hasChanges()}
+            className="flex items-center gap-2"
+            onClick={handleSubmit}
+          >
+            {loading && <Icon icon="heroicons:arrow-path-20-solid" className="w-4 h-4 animate-spin" />}
+            {loading ? 'Updating...' : 'Update Skill'}
+          </Button>
+        </div>
         </form>
       </div>
     </div>

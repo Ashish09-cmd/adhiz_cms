@@ -8,8 +8,10 @@ import Image from "next/image";
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
+    setLoading(true);
     e.preventDefault();
     try {
       const res = await fetch(
@@ -29,6 +31,7 @@ const LoginPage = () => {
 
       if (!res.ok) {
         alert(data.message || "Login failed");
+        setLoading(false);
         return;
       }
 
@@ -38,6 +41,7 @@ const LoginPage = () => {
         localStorage.setItem("loginEmail", email);
 
         window.location.href = "/vefify-otp";
+        setLoading(false);
         return;
       }
 
@@ -46,12 +50,24 @@ const LoginPage = () => {
         localStorage.setItem("accessToken", data.accessToken);
         localStorage.setItem("refreshToken", data.refreshToken);
         window.location.href = "/dashboard";
+        setLoading(false);
       }
     } catch (error) {
       console.error(error);
       alert("Unable to connect to server");
+      setLoading(false);
     }
+    
   };
+ 
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center  h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+  
 
   return (
     <div className="min-h-screen bg-bg-primary">
@@ -160,3 +176,4 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+

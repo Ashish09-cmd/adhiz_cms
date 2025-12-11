@@ -13,6 +13,15 @@ const OTPPage = () => {
     if (storedEmail) setEmail(storedEmail);
   }, []);
 
+
+
+
+
+
+
+
+
+  
   const handleOtpChange = (index: number, value: string) => {
     if (value.length > 1) return;
     const newOtp = [...otp];

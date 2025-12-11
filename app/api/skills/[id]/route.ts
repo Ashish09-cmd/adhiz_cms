@@ -12,7 +12,9 @@ const mockSkills = [
     seo_description: 'Master JavaScript fundamentals including variables, functions, and control structures for web development.',
     seo_keywords: 'JavaScript, programming, basics, web development',
     created_at: '2023-10-01T10:00:00Z',
-    updated_at: '2023-10-15T14:30:00Z'
+    updated_at: '2023-10-15T14:30:00Z',
+    "status": "active"
+
   },
   {
     id: 2,
@@ -24,7 +26,8 @@ const mockSkills = [
     seo_description: 'Learn React.js to create dynamic web applications with components, state management, and hooks.',
     seo_keywords: 'React, JavaScript, web development, components, hooks',
     created_at: '2023-09-15T09:00:00Z',
-    updated_at: '2023-10-20T16:45:00Z'
+    updated_at: '2023-10-20T16:45:00Z',
+    "status": "active"
   },
   {
     id: 3,
@@ -36,7 +39,8 @@ const mockSkills = [
     seo_description: 'Develop backend applications using Node.js, Express framework, and database integration.',
     seo_keywords: 'Node.js, backend, Express, server-side, database',
     created_at: '2023-08-20T11:30:00Z',
-    updated_at: '2023-10-10T13:20:00Z'
+    updated_at: '2023-10-10T13:20:00Z',
+    "status": "active"
   },
   {
     id: 4,
@@ -48,7 +52,8 @@ const mockSkills = [
     seo_description: 'Dive into data science with Python, using pandas and scikit-learn for analysis and machine learning.',
     seo_keywords: 'Python, data science, pandas, scikit-learn, machine learning',
     created_at: '2023-07-10T08:15:00Z',
-    updated_at: '2023-09-25T12:00:00Z'
+    updated_at: '2023-09-25T12:00:00Z',
+    "status": "active"
   },
   {
     id: 5,
@@ -60,7 +65,8 @@ const mockSkills = [
     seo_description: 'Learn UI/UX design principles to build intuitive and visually appealing user interfaces.',
     seo_keywords: 'UI/UX, design, user interface, user experience, design principles',
     created_at: '2023-06-05T14:20:00Z',
-    updated_at: '2023-08-30T10:45:00Z'
+    updated_at: '2023-08-30T10:45:00Z',
+    "status": "active"
   },
   {
     id: 6,
@@ -72,7 +78,8 @@ const mockSkills = [
     seo_description: 'Master database management with SQL and NoSQL, including query optimization and data modeling.',
     seo_keywords: 'database, SQL, NoSQL, query optimization, data modeling',
     created_at: '2023-05-12T16:00:00Z',
-    updated_at: '2023-10-25T11:30:00Z'
+    updated_at: '2023-10-25T11:30:00Z',
+    "status": "active"
   },
   {
     id: 7,
@@ -84,7 +91,8 @@ const mockSkills = [
     seo_description: 'Learn cloud computing to deploy and manage applications on AWS, Azure, and Google Cloud.',
     seo_keywords: 'cloud computing, AWS, Azure, Google Cloud, deployment',
     created_at: '2023-04-18T13:45:00Z',
-    updated_at: '2023-07-15T15:20:00Z'
+    updated_at: '2023-07-15T15:20:00Z',
+    "status": "active"
   },
   {
     id: 8,
@@ -96,7 +104,8 @@ const mockSkills = [
     seo_description: 'Implement DevOps practices including CI/CD pipelines, Docker containerization, and infrastructure as code.',
     seo_keywords: 'DevOps, CI/CD, Docker, containerization, infrastructure as code',
     created_at: '2023-03-22T10:30:00Z',
-    updated_at: '2023-09-18T09:15:00Z'
+    updated_at: '2023-09-18T09:15:00Z',
+    "status": "active"
   },
   {
     id: 9,
@@ -108,7 +117,8 @@ const mockSkills = [
     seo_description: 'Build cross-platform mobile apps with React Native and Flutter frameworks.',
     seo_keywords: 'mobile app, React Native, Flutter, cross-platform',
     created_at: '2023-02-14T12:00:00Z',
-    updated_at: '2023-08-05T14:00:00Z'
+    updated_at: '2023-08-05T14:00:00Z',
+    "status": "active"
   },
   {
     id: 10,
@@ -120,7 +130,8 @@ const mockSkills = [
     seo_description: 'Learn cybersecurity fundamentals including encryption and secure coding best practices.',
     seo_keywords: 'cybersecurity, encryption, secure coding, security concepts',
     created_at: '2023-01-08T09:45:00Z',
-    updated_at: '2023-10-28T16:30:00Z'
+    updated_at: '2023-10-28T16:30:00Z',
+    "status": "active"
   },
   {
     id: 11,
@@ -132,7 +143,8 @@ const mockSkills = [
     seo_description: 'Design and implement RESTful APIs with proper documentation and versioning strategies.',
     seo_keywords: 'API, RESTful, documentation, versioning',
     created_at: '2022-12-01T11:15:00Z',
-    updated_at: '2023-06-20T13:45:00Z'
+    updated_at: '2023-06-20T13:45:00Z',
+    "status": "active"
   },
   {
     id: 12,
@@ -144,7 +156,8 @@ const mockSkills = [
     seo_description: 'Master version control with Git and GitHub for collaborative software development.',
     seo_keywords: 'Git, GitHub, version control, collaborative development',
     created_at: '2022-11-10T15:30:00Z',
-    updated_at: '2023-05-12T10:20:00Z'
+    updated_at: '2023-05-12T10:20:00Z',
+    "status": "active"
   }
 ];
 

@@ -98,7 +98,7 @@ const ViewSkillPage: React.FC = () => {
           >
             <Icon icon="heroicons:arrow-left-20-solid" className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold text-gray-900 font-poppins">View Skill</h1>
+          <h1 className="text-md font-bold text-gray-900 font-poppins">View Skill</h1>
         </div>
         <Button
           variant="primary"
@@ -127,7 +127,7 @@ const ViewSkillPage: React.FC = () => {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Priority
             </label>
-            <span className={`inline-flex px-3 py-1 text-sm font-semibold rounded-full ${getPriorityColor(skill.priority)}`}>
+            <span className={`inline-flex text-emerald-500 px-3 py-1 text-xs font-regular  rounded-full ${getPriorityColor(skill.priority)}`}>
               {skill.priority}
             </span>
           </div>

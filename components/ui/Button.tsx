@@ -15,10 +15,10 @@ export const Button: React.FC<ButtonProps> = ({
   children,
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none border border-gray-border ';
+  const baseClasses = 'inline-flex cursor-pointer items-center justify-center font-medium transition-all duration-200 focus:outline-none border border-gray-border ';
 
   const variantClasses = {
-    primary: 'bg-bg-button-primary text-text-button-primary hover:bg-bg-button-primary-hover focus:ring-border-focus',
+    primary: 'bg-bg-button-primary cursor-pointer text-text-button-primary hover:bg-bg-button-primary-hover focus:ring-border-focus',
     secondary: 'bg-bg-button-secondary text-text-button-secondary hover:bg-bg-button-secondary-hover focus:ring-border-focus',
   };
 

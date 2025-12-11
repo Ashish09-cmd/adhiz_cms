@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { Icon } from '@iconify/react';
-import { Button } from '../../../components/ui/Button';
+import React, { useState, useEffect } from "react";
+import { Icon } from "@iconify/react";
+import { Button } from "../../../components/ui/Button";
 
 interface Skill {
   id: number;
@@ -15,6 +15,7 @@ interface Skill {
   seo_keywords: string;
   created_at: string;
   updated_at: string;
+  status: "active" | "inactive";
 }
 
 interface ApiResponse {
@@ -31,15 +32,22 @@ const SkillsPage: React.FC = () => {
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'title' | 'priority' | 'created_at'>('created_at');
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortBy, setSortBy] = useState<"title" | "priority" | "created_at">(
+    "created_at"
+  );
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showFilterPopover, setShowFilterPopover] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<"active" | "inactive" | "">(
+    ""
+  );
+  const [unsavedFilter, setUnsavedFilter] = useState(statusFilter);
 
   const itemsPerPage = 10;
 
@@ -51,12 +59,12 @@ const SkillsPage: React.FC = () => {
         limit: itemsPerPage.toString(),
         search: searchTerm,
         sortBy,
-        sortOrder
+        sortOrder,
       });
 
       const response = await fetch(`/api/skills?${params}`);
       if (!response.ok) {
-        throw new Error('Failed to fetch skills');
+        throw new Error("Failed to fetch skills");
       }
 
       const data: ApiResponse = await response.json();
@@ -64,7 +72,7 @@ const SkillsPage: React.FC = () => {
       setTotalPages(data.pagination.totalPages);
       setError(null);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setLoading(false);
     }
@@ -74,12 +82,12 @@ const SkillsPage: React.FC = () => {
     fetchSkills();
   }, [currentPage, searchTerm, sortBy, sortOrder]);
 
-  const handleSort = (column: 'title' | 'priority' | 'created_at') => {
+  const handleSort = (column: "title" | "priority" | "created_at") => {
     if (sortBy === column) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortBy(column);
-      setSortOrder('asc');
+      setSortOrder("asc");
     }
     setCurrentPage(1);
   };
@@ -88,6 +96,10 @@ const SkillsPage: React.FC = () => {
     e.preventDefault();
     setCurrentPage(1);
     fetchSkills();
+  };
+
+  const getSkillStatus = (skill: Skill) => {
+    return skill.priority >= 5 ? "active" : "inactive";
   };
 
   const handleView = (skill: Skill) => {
@@ -103,39 +115,53 @@ const SkillsPage: React.FC = () => {
     setShowDeleteModal(true);
   };
 
+  // Filter function
+  const applyFilters = () => {
+    setStatusFilter(unsavedFilter);
+    setShowFilterPopover(false);
+    setCurrentPage(1);
+    fetchSkills();
+  };
+
+  const resetFilters = () => {
+    setUnsavedFilter("");
+  };
+
   const confirmDelete = async () => {
     if (!selectedSkill) return;
 
     try {
       const response = await fetch(`/api/skills/${selectedSkill.id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete skill');
+        throw new Error("Failed to delete skill");
       }
 
       setShowDeleteModal(false);
       setSelectedSkill(null);
       fetchSkills(); // Refresh the list
     } catch (err) {
-      console.error('Error deleting skill:', err);
+      console.error("Error deleting skill:", err);
       // You might want to show an error message to the user here
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toISOString().split('T')[0];
+    return new Date(dateString).toISOString().split("T")[0];
   };
 
   const truncateDescription = (description: string, maxLength: number = 50) => {
-    return description.length > maxLength ? description.substring(0, maxLength) + '...' : description;
+    return description.length > maxLength
+      ? description.substring(0, maxLength) + "..."
+      : description;
   };
 
   const getPriorityColor = (priority: number) => {
-    if (priority >= 8) return 'bg-red-100 text-red-800';
-    if (priority >= 6) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-green-100 text-green-800';
+    if (priority >= 8) return "bg-red-100 text-red-800";
+    if (priority >= 6) return "bg-yellow-100 text-yellow-800";
+    return "bg-green-100 text-green-800";
   };
 
   if (loading && skills.length === 0) {
@@ -158,12 +184,14 @@ const SkillsPage: React.FC = () => {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-gray-900 font-poppins">Skills List</h1>
+        <h1 className="text-2xl font-bold text-gray-900 font-poppins">
+          Skills List
+        </h1>
         <Button
           variant="primary"
           size="md"
-          className="flex items-center gap-2"
-          onClick={() => window.location.href = '/dashboard/skills/add'}
+          className="flex items-center gap-2 bg-green-600 text-white cursor-pointer"
+          onClick={() => (window.location.href = "/dashboard/skills/add")}
         >
           <Icon icon="heroicons:plus-20-solid" className="w-4 h-4" />
           Add Skill
@@ -171,7 +199,7 @@ const SkillsPage: React.FC = () => {
       </div>
 
       {/* Search and Filters */}
-      <div className="bg-white p-4 border border-gray-200 rounded-lg">
+      {/* <div className="bg-white p-4 border border-gray-200 rounded-lg">
         <form onSubmit={handleSearch} className="flex gap-4">
           <div className="flex-1">
             <input
@@ -186,6 +214,89 @@ const SkillsPage: React.FC = () => {
             Search
           </Button>
         </form>
+      </div> */}
+      <div className="bg-white p-4 border border-gray-200 rounded-lg flex items-center gap-4">
+        <form onSubmit={handleSearch} className="flex-1 flex gap-4">
+          <input
+            type="text"
+            placeholder="Search by title..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+
+          <Button
+            type="submit"
+            variant="secondary"
+            size="md"
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <Icon
+              icon="heroicons:magnifying-glass-20-solid"
+              className="w-4 h-4"
+            />
+            Search
+          </Button>
+        </form>
+
+        {/* Filter Button */}
+        <div className="relative">
+          <Button
+            variant={statusFilter ? "primary" : "secondary"}
+            size="md"
+            onClick={() => setShowFilterPopover((prev) => !prev)}
+            className="flex items-center gap-2 cursor-pointer"
+          >
+            <Icon icon="mdi:filter-outline" className="w-4 h-4" />
+            Filter
+            {statusFilter && (
+              <span className="inline-block w-2 h-2 bg-red-500 rounded-full"></span>
+            )}
+          </Button>
+          {showFilterPopover && (
+            <div
+              className="absolute right-0 mt-2 w-64 bg-white border border-gray-300 rounded-lg shadow-lg z-50 p-4"
+              onClick={(e) => e.stopPropagation()} // prevent closing when clicking inside
+            >
+              <h4 className="text-gray-800 font-semibold mb-2">Filters</h4>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={unsavedFilter}
+                  onChange={(e) => setUnsavedFilter(e.target.value as any)}
+                  className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Any</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+
+              <div className="flex justify-end gap-2">
+                <button
+                  className="px-3 py-1 border rounded-md bg-gray-100 hover:bg-gray-200"
+                  onClick={() => setUnsavedFilter("")}
+                >
+                  Reset
+                </button>
+                <button
+                  className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                  onClick={() => {
+                    setStatusFilter(unsavedFilter);
+                    setShowFilterPopover(false);
+                    setCurrentPage(1);
+                    fetchSkills();
+                  }}
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Table */}
@@ -196,13 +307,17 @@ const SkillsPage: React.FC = () => {
               <tr>
                 <th
                   className="px-6 py-3 border border-[#ddd] text-left text-xs font-bold text-primary-title  capatalize tracking-wider cursor-pointer"
-                  onClick={() => handleSort('title')}
+                  onClick={() => handleSort("title")}
                 >
                   <div className="flex items-center gap-1">
                     Title
-                    {sortBy === 'title' && (
+                    {sortBy === "title" && (
                       <Icon
-                        icon={sortOrder === 'asc' ? 'heroicons:chevron-up-20-solid' : 'heroicons:chevron-down-20-solid'}
+                        icon={
+                          sortOrder === "asc"
+                            ? "heroicons:chevron-up-20-solid"
+                            : "heroicons:chevron-down-20-solid"
+                        }
                         className="w-4 h-4"
                       />
                     )}
@@ -210,13 +325,17 @@ const SkillsPage: React.FC = () => {
                 </th>
                 <th
                   className="px-6 border border-[#ddd] py-3 text-left text-xs font-bold text-primary-title  capatalize tracking-wider cursor-pointer"
-                  onClick={() => handleSort('priority')}
+                  onClick={() => handleSort("priority")}
                 >
                   <div className="flex items-center gap-1">
                     Priority
-                    {sortBy === 'priority' && (
+                    {sortBy === "priority" && (
                       <Icon
-                        icon={sortOrder === 'asc' ? 'heroicons:chevron-up-20-solid' : 'heroicons:chevron-down-20-solid'}
+                        icon={
+                          sortOrder === "asc"
+                            ? "heroicons:chevron-up-20-solid"
+                            : "heroicons:chevron-down-20-solid"
+                        }
                         className="w-4 h-4"
                       />
                     )}
@@ -225,22 +344,12 @@ const SkillsPage: React.FC = () => {
                 <th className="px-6 border border-[#ddd] py-3 text-left text-xs font-bold text-primary-title  capatalize tracking-wider">
                   Description
                 </th>
-                <th
-                  className="px-6 py-3 border border-[#ddd] text-left text-xs font-bold text-primary-title  capatalize tracking-wider cursor-pointer"
-                  onClick={() => handleSort('created_at')}
-                >
-                  <div className="flex items-center gap-1">
-                    Created At
-                    {sortBy === 'created_at' && (
-                      <Icon
-                        icon={sortOrder === 'asc' ? 'heroicons:chevron-up-20-solid' : 'heroicons:chevron-down-20-solid'}
-                        className="w-4 h-4"
-                      />
-                    )}
-                  </div>
-                </th>
+
                 <th className="px-6 py-3 border border-[#ddd] text-left text-xs font-bold text-primary-title  capatalize tracking-wider">
                   Updated At
+                </th>
+                <th className="px-6 py-3 border border-[#ddd] text-left text-xs font-bold text-primary-title  capatalize tracking-wider">
+                  Status
                 </th>
                 <th className="px-6 py-3 text-left border border-[#ddd] text-xs font-bold text-primary-title  capatalize tracking-wider">
                   Actions
@@ -249,23 +358,46 @@ const SkillsPage: React.FC = () => {
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {skills.map((skill) => (
-                <tr key={skill.id} className={skill.priority >= 8 ? 'bg-yellow-50' : ''}>
+                <tr
+                  key={skill.id}
+                  className={skill.priority >= 8 ? "bg-yellow-50" : ""}
+                >
                   <td className="px-6 py-4 border border-[#ddd] whitespace-nowrap text-sm font-medium text-gray-900">
                     {skill.title}
                   </td>
                   <td className="px-6 border border-[#ddd] py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(skill.priority)}`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getPriorityColor(
+                        skill.priority
+                      )}`}
+                    >
                       {skill.priority}
                     </span>
                   </td>
                   <td className="px-6 py-4 border border-[#ddd] text-sm text-gray-text-body font-regular  max-w-xs">
                     {truncateDescription(skill.description)}
                   </td>
-                  <td className="px-6 border border-[#ddd] py-4 whitespace-nowrap text-sm font-dmSans text-gray-text-body">
-                    {formatDate(skill.created_at)}
-                  </td>
+
                   <td className="px-6 py-4 border border-[#ddd] whitespace-nowrap text-sm font-dmSans text-gray-text-body ">
                     {formatDate(skill.updated_at)}
+                  </td>
+                  <td className="px-6 py-4 border border-[#ddd]">
+                    <div className="relative group inline-block">
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold  cursor-default ${
+                          getSkillStatus(skill) === "active"
+                            ? " text-green-800"
+                            : " text-gray-800"
+                        }`}
+                      >
+                        {getSkillStatus(skill) === "active"
+                          ? "Active"
+                          : "Inactive"}
+                      </span>
+                      <div className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
+                        {getSkillStatus(skill)}
+                      </div>
+                    </div>
                   </td>
                   <td className="px-6 py-4 border border-[#ddd] whitespace-nowrap text-sm font-medium">
                     <div className="flex gap-2">
@@ -274,21 +406,30 @@ const SkillsPage: React.FC = () => {
                         className="text-blue-600 hover:text-blue-900 p-1 rounded"
                         title="View"
                       >
-                        <Icon icon="heroicons:eye-20-solid" className="w-4 h-4" />
+                        <Icon
+                          icon="heroicons:eye-20-solid"
+                          className="w-4 h-4"
+                        />
                       </button>
                       <button
                         onClick={() => handleEdit(skill)}
                         className="text-green-600 hover:text-green-900 p-1 rounded"
                         title="Edit"
                       >
-                        <Icon icon="heroicons:pencil-20-solid" className="w-4 h-4" />
+                        <Icon
+                          icon="heroicons:pencil-20-solid"
+                          className="w-4 h-4"
+                        />
                       </button>
                       <button
                         onClick={() => handleDelete(skill)}
                         className="text-red-600 hover:text-red-900 p-1 rounded"
                         title="Delete"
                       >
-                        <Icon icon="heroicons:trash-20-solid" className="w-4 h-4" />
+                        <Icon
+                          icon="heroicons:trash-20-solid"
+                          className="w-4 h-4"
+                        />
                       </button>
                     </div>
                   </td>
@@ -309,7 +450,10 @@ const SkillsPage: React.FC = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  className="bg-[#2F2F9E] text-white"
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
                   disabled={currentPage === 1}
                 >
                   Previous
@@ -317,8 +461,11 @@ const SkillsPage: React.FC = () => {
                 <Button
                   variant="secondary"
                   size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
                   disabled={currentPage === totalPages}
+                  className="text-white bg-green-700  "
                 >
                   Next
                 </Button>
@@ -343,40 +490,76 @@ const SkillsPage: React.FC = () => {
             </div>
             <div className="space-y-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Title</label>
-                <p className="mt-1 text-sm text-gray-900">{selectedSkill.title}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Title
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {selectedSkill.title}
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Priority</label>
-                <p className="mt-1 text-sm text-gray-900">{selectedSkill.priority}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Priority
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {selectedSkill.priority}
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Description</label>
-                <p className="mt-1 text-sm text-gray-900">{selectedSkill.description}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Description
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {selectedSkill.description}
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Slug</label>
-                <p className="mt-1 text-sm text-gray-900">{selectedSkill.slug}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Slug
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {selectedSkill.slug}
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">SEO Title</label>
-                <p className="mt-1 text-sm text-gray-900">{selectedSkill.seo_title}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  SEO Title
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {selectedSkill.seo_title}
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">SEO Description</label>
-                <p className="mt-1 text-sm text-gray-900">{selectedSkill.seo_description}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  SEO Description
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {selectedSkill.seo_description}
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">SEO Keywords</label>
-                <p className="mt-1 text-sm text-gray-900">{selectedSkill.seo_keywords}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  SEO Keywords
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {selectedSkill.seo_keywords}
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Created At</label>
-                <p className="mt-1 text-sm text-gray-900">{formatDate(selectedSkill.created_at)}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Created At
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {formatDate(selectedSkill.created_at)}
+                </p>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Updated At</label>
-                <p className="mt-1 text-sm text-gray-900">{formatDate(selectedSkill.updated_at)}</p>
+                <label className="block text-sm font-medium text-gray-700">
+                  Updated At
+                </label>
+                <p className="mt-1 text-sm text-gray-900">
+                  {formatDate(selectedSkill.updated_at)}
+                </p>
               </div>
             </div>
           </div>
@@ -396,9 +579,14 @@ const SkillsPage: React.FC = () => {
                 <Icon icon="heroicons:x-mark-20-solid" className="w-6 h-6" />
               </button>
             </div>
-            <p className="text-gray-600">Edit functionality would be implemented here with a form.</p>
+            <p className="text-gray-600">
+              Edit functionality would be implemented here with a form.
+            </p>
             <div className="mt-4 flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setShowEditModal(false)}>
+              <Button
+                variant="secondary"
+                onClick={() => setShowEditModal(false)}
+              >
                 Cancel
               </Button>
               <Button variant="primary" onClick={() => setShowEditModal(false)}>
@@ -414,7 +602,9 @@ const SkillsPage: React.FC = () => {
         <div className="fixed inset-0 bg-[#00000040] flex items-center justify-center z-[100]">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl relative">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold text-red-600">Delete Skill</h3>
+              <h3 className="text-lg font-semibold text-red-600">
+                Delete Skill
+              </h3>
               <button
                 onClick={() => setShowDeleteModal(false)}
                 className="text-gray-400 hover:text-gray-600"
@@ -423,13 +613,21 @@ const SkillsPage: React.FC = () => {
               </button>
             </div>
             <p className="text-gray-700 mb-4">
-              Are you sure you want to delete "{selectedSkill.title}"? This action cannot be undone.
+              Are you sure you want to delete "{selectedSkill.title}"? This
+              action cannot be undone.
             </p>
             <div className="flex justify-end gap-2">
-              <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+              <Button
+                variant="secondary"
+                onClick={() => setShowDeleteModal(false)}
+              >
                 Cancel
               </Button>
-              <Button variant="secondary" onClick={confirmDelete} className="bg-[#1A73E8] text-white hover:bg-blue-700">
+              <Button
+                variant="secondary"
+                onClick={confirmDelete}
+                className="bg-[#1A73E8] text-white hover:bg-blue-700"
+              >
                 Delete
               </Button>
             </div>
