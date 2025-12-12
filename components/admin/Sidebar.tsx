@@ -40,9 +40,9 @@ const Sidebar: React.FC = () => {
   return (
     <div className="w-64 bg-white shadow-lg h-screen fixed left-0 top-0 flex flex-col border-r border-gray-200">
       <div className="sticky top-0 p-3 shadow-sm border-b border-gray-200 bg-white z-10">
-        <h2 className=" flex items-center justify-center">
+        <a href='/dashboard' className=" flex items-center justify-center">
             <img src="/logo.svg" alt="" />
-        </h2>
+        </a>
       </div>
       <nav className="flex-1 mt-5 overflow-y-auto p-4">
         {menuItems.map((category, index) => (
