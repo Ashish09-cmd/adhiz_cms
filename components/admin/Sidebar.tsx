@@ -78,7 +78,7 @@ const Sidebar: React.FC = () => {
               <div className={`overflow-hidden transition-all duration-600 ease-linear ${openItems[index] ? 'max-h-120 opacity-100 pb-2' : 'max-h-0 opacity-0'}`}>
                 <ul className="space-y-1 ps-1.5 border-primary-border-darker border-s ms-1.5">
                   {category.items.map((item, itemIndex) => {
-                    // Create dynamic routes for Skills section
+                    // Skills section
                     const getRoute = () => {
                       if (category.category === 'Skills') {
                         if (item === 'List') {
@@ -87,6 +87,16 @@ const Sidebar: React.FC = () => {
                         const itemSlug = item.toLowerCase().replace(/\s+/g, '-');
                         return `/dashboard/skills/${itemSlug}`;
                       }
+
+                      //  home page slider
+                       if (category.category === 'home page slider') {
+                        if (item === 'List') {
+                          return `/dashboard/slider`;
+                        }
+                        const itemSlug = item.toLowerCase().replace(/\s+/g, '-');
+                        return `/dashboard/slider/${itemSlug}`;
+                      }
+                      
                       // Add similar logic for other categories as needed
                       return '#';
                     };

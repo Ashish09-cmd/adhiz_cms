@@ -88,7 +88,7 @@ h1, h2, h3, h4, h5, h6 {
   --color-success-900: #182c0d;
   --color-success-950: #0b1406;
 
-  /* gray */
+  /* gray */ 
   --color-gray-50: #f9f9fa;
   --color-gray-100: #f7f7f8;
   --color-gray-200: #eeeef1;
@@ -101,7 +101,7 @@ h1, h2, h3, h4, h5, h6 {
   --color-gray-900: #2f2f37;
   --color-gray-950: #17171c;
 
-  /* error */
+  /* error */ 
   --color-error-50: #fceae9;
   --color-error-100: #f9d5d2;
   --color-error-200: #f2aca6;
@@ -114,7 +114,7 @@ h1, h2, h3, h4, h5, h6 {
   --color-error-900: #2d0906;
   --color-error-950: #160503;
 
-  /* warning */
+  /* warning */ 
   --color-warning-50: #fffcf0;
   --color-warning-100: #fef9e1;
   --color-warning-200: #fef3c3;
@@ -127,7 +127,7 @@ h1, h2, h3, h4, h5, h6 {
   --color-warning-900: #504202;
   --color-warning-950: #282101;
 
-  /* blue */
+  /* blue */ 
   --color-blue-50: #e8e9f7;
   --color-blue-100: #d2d3ef;
   --color-blue-200: #a4a7df;

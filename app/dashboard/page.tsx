@@ -17,7 +17,6 @@ const Dashboard: React.FC = () => {
     { title: 'Total Enquiries',value: 128, icon: 'heroicons:phone-20-solid', color: 'border-green-500' },
     { title: 'Testimonials', value: 67, icon: 'heroicons:star-20-solid', color: 'border-yellow-500' },
     { title: 'Active Users', value: 892, icon: 'heroicons:users-20-solid', color: 'border-purple-500' },
-
   ];
 
   const tableHeaders = ['Name', 'Email', 'Status', 'Date'];

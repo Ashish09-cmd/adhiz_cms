@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Icon } from "@iconify/react";
 import { Button } from "../../../../components/ui/Button";
 import RichTextEditor from "@/components/ui/Editor";
+import api from "@/lib/axios"; // Axios instance
 
 const AddSkillPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -21,7 +22,7 @@ const AddSkillPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -36,42 +37,26 @@ const AddSkillPage: React.FC = () => {
     setError(null);
 
     try {
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || "";
       const token = typeof window !== "undefined" ? localStorage.getItem("accessToken") : null;
-
       if (!token) {
-        // Not authenticated
-        alert("You must be logged in to create a skill. Redirecting to login...");
+        alert("You must be logged in to create a skill");
         window.location.href = "/login";
         return;
       }
 
-      const payload = {
-        ...formData,
-      };
-
-      const res = await fetch(`${apiBase}/skills`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        // try extract message from response
-        const msg = data?.message || data?.error || "Failed to create skill";
-        throw new Error(msg);
-      }
+      const res = await api.post("/skills", formData); // Axios handles baseURL and Authorization
 
       // Success → redirect to skills list
       window.location.href = "/dashboard/skills";
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
-      setError(err instanceof Error ? err.message : "An error occurred");
+      // Axios error handling
+      const msg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        err.message ||
+        "Failed to create skill";
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -87,26 +72,22 @@ const AddSkillPage: React.FC = () => {
       <div className="flex items-center gap-4">
         <button
           onClick={handleCancel}
-          className="text-gray-800 cursor-pointer hover:text-gray-900 p-2  hover:bg-gray-100"
+          className="text-gray-800 cursor-pointer hover:text-gray-900 p-2 hover:bg-gray-100"
         >
           <Icon icon="heroicons:arrow-left-20-solid" className="w-5 h-5" />
         </button>
-        <h1 className="text-md font-bold text-gray-900 font-poppins">
-          Add New Skill
-        </h1>
+        <h1 className="text-md font-bold text-gray-900 font-poppins">Add New Skill</h1>
       </div>
 
       {/* Form */}
-      <div className="bg-white  p-8">
+      <div className="bg-white p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* title */}
+            {/* Left Section */}
             <div className="flex flex-col gap-4 p-6 bg-white border border-gray-border-darker">
+              {/* title */}
               <div>
-                <label
-                  htmlFor="title"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                   Title *
                 </label>
                 <input
@@ -116,16 +97,13 @@ const AddSkillPage: React.FC = () => {
                   value={formData.title}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300  focus:outline-none "
+                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                   placeholder="Enter skill title"
                 />
               </div>
               {/* priority */}
               <div>
-                <label
-                  htmlFor="priority"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-2">
                   Priority
                 </label>
                 <input
@@ -134,17 +112,14 @@ const AddSkillPage: React.FC = () => {
                   name="priority"
                   value={formData.priority}
                   onChange={handleInputChange}
-                  min="1"
-                  max="10"
-                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none "
+                  min={1}
+                  max={10}
+                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                 />
               </div>
               {/* description */}
               <div>
-                <label
-                  htmlFor="description"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
                   Description *
                 </label>
                 <textarea
@@ -153,16 +128,13 @@ const AddSkillPage: React.FC = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none "
+                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                   placeholder="Enter skill description"
                 />
               </div>
               {/* slug */}
               <div>
-                <label
-                  htmlFor="slug"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
                   Slug *
                 </label>
                 <input
@@ -172,24 +144,21 @@ const AddSkillPage: React.FC = () => {
                   value={formData.slug}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none "
+                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                   placeholder="Enter URL slug (e.g., javascript-fundamentals)"
                 />
               </div>
               {/* status */}
               <div>
-                <label
-                  htmlFor="status"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
                   Status *
                 </label>
                 <select
                   id="status"
                   name="status"
-                  value={formData.status || ''}
+                  value={formData.status}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none "
+                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                 >
                   <option value="active">Active</option>
                   <option value="inactive">Inactive</option>
@@ -197,17 +166,13 @@ const AddSkillPage: React.FC = () => {
               </div>
             </div>
 
-            <div
-              className="flex flex-col gap-4 p-6 bg-white border border-gray-border-darker"
-            >
-              <h6 className="text-gray-800 font-poppins font-bold text-sm pb-2 border-gray-border-darker  border-b">
+            {/* Right Section: SEO */}
+            <div className="flex flex-col gap-4 p-6 bg-white border border-gray-border-darker">
+              <h6 className="text-gray-800 font-poppins font-bold text-sm pb-2 border-gray-border-darker border-b">
                 SEO Section
               </h6>
               <div>
-                <label
-                  htmlFor="seo_title"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="seo_title" className="block text-sm font-medium text-gray-700 mb-2">
                   SEO Title
                 </label>
                 <input
@@ -216,16 +181,13 @@ const AddSkillPage: React.FC = () => {
                   name="seo_title"
                   value={formData.seo_title}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300  focus:outline-none "
+                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                   placeholder="Enter SEO title"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="seo_description"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="seo_description" className="block text-sm font-medium text-gray-700 mb-2">
                   SEO Description
                 </label>
                 <textarea
@@ -234,16 +196,13 @@ const AddSkillPage: React.FC = () => {
                   value={formData.seo_description}
                   onChange={handleInputChange}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300  focus:outline-none "
+                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                   placeholder="Enter SEO description"
                 />
               </div>
 
               <div>
-                <label
-                  htmlFor="seo_keywords"
-                  className="block text-sm font-medium text-gray-700 mb-2"
-                >
+                <label htmlFor="seo_keywords" className="block text-sm font-medium text-gray-700 mb-2">
                   SEO Keywords
                 </label>
                 <input
@@ -252,12 +211,13 @@ const AddSkillPage: React.FC = () => {
                   name="seo_keywords"
                   value={formData.seo_keywords}
                   onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300  focus:outline-none "
+                  className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                   placeholder="Enter SEO keywords (comma separated)"
                 />
               </div>
             </div>
           </div>
+
           {error && (
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3">
               Error: {error}
@@ -270,7 +230,7 @@ const AddSkillPage: React.FC = () => {
               variant="secondary"
               onClick={handleCancel}
               disabled={loading}
-              className="bg-error text-white "
+              className="bg-error text-white"
             >
               Cancel
             </Button>
@@ -280,12 +240,7 @@ const AddSkillPage: React.FC = () => {
               disabled={loading}
               className="flex items-center gap-2"
             >
-              {loading && (
-                <Icon
-                  icon="heroicons:arrow-path-20-solid"
-                  className="w-4 h-4 animate-spin"
-                />
-              )}
+              {loading && <Icon icon="heroicons:arrow-path-20-solid" className="w-4 h-4 animate-spin" />}
               {loading ? "Creating..." : "Create Skill"}
             </Button>
           </div>
