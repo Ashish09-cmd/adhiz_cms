@@ -1,88 +1,106 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
-import { Icon } from '@iconify/react';
-import { Button } from '@/components/ui/Button';
+import React, { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { Icon } from "@iconify/react";
+import api from "@/lib/axios";
+import { Button } from "../../../../components/ui/Button";
 
-interface Skill {
-  id: number;
-  title: string;
-  priority: number;
-  description: string;
-  slug: string;
-  seo_title: string;
-  seo_description: string;
-  seo_keywords: string;
-  created_at: string;
-  updated_at: string;
-}
+const EditSkillPage: React.FC = () => {
+  const { slug } = useParams();
+  const router = useRouter();
 
-const ViewSkillPage: React.FC = () => {
-  const params = useParams();
-  const id = params.id as string;
+  const [skillId, setSkillId] = useState<string>("");
 
-  const [skill, setSkill] = useState<Skill | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [formData, setFormData] = useState({
+    title: "",
+    priority: 1,
+    description: "",
+    slug: "",
+    seo_title: "",
+    seo_description: "",
+    seo_keywords: "",
+    status: "active",
+  });
+
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // 🔹 Fetch skill details
   useEffect(() => {
+    if (!slug) return;
+
     const fetchSkill = async () => {
       try {
-        const response = await fetch(`/api/skills/${id}`);
-        if (!response.ok) {
-          throw new Error('Failed to fetch skill');
-        }
-        const skillData: Skill = await response.json();
-        setSkill(skillData);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
+        setFetching(true);
+        const res = await api.get(`/skills/${slug}`);
+        const skill = res.data.data;
+
+        setSkillId(skill.id);
+        setFormData({
+          title: skill.title,
+          priority: skill.priority,
+          description: skill.description,
+          slug: skill.slug,
+          seo_title: skill.seo_title || "",
+          seo_description: skill.seo_description || "",
+          seo_keywords: skill.seo_keywords || "",
+          status: skill.status || "active",
+        });
+      } catch (err: any) {
+        setError(
+          err.response?.data?.message ||
+            err.response?.data?.error ||
+            "Failed to load skill"
+        );
       } finally {
-        setLoading(false);
+        setFetching(false);
       }
     };
 
-    if (id) {
-      fetchSkill();
+    fetchSkill();
+  }, [slug]);
+
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name === "priority" ? Number(value) : value,
+    }));
+  };
+
+  // 🔹 Update skill
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+
+    try {
+      await api.put(`/skills/${skillId}`, formData);
+      router.push("/dashboard/skills");
+    } catch (err: any) {
+      setError(
+        err.response?.data?.message ||
+          err.response?.data?.error ||
+          "Failed to update skill"
+      );
+    } finally {
+      setLoading(false);
     }
-  }, [id]);
-
-  const handleBack = () => {
-    window.location.href = '/dashboard/skills';
   };
 
-  const handleEdit = () => {
-    window.location.href = `/dashboard/skills/${id}/edit`;
+  const handleCancel = () => {
+    router.push("/dashboard/skills");
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  };
-
-  const getPriorityColor = (priority: number) => {
-    if (priority >= 8) return 'bg-red-100 text-red-800';
-    if (priority >= 6) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-green-100 text-green-800';
-  };
-
-  if (loading) {
+  if (fetching) {
     return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1A73E8]"></div>
-      </div>
-    );
-  }
-
-  if (error || !skill) {
-    return (
-      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-        Error: {error || 'Skill not found'}
+      <div className="p-6 text-center">
+        <Icon icon="heroicons:arrow-path-20-solid" className="w-5 h-5 animate-spin inline-block mr-2" />
+        Loading skill...
       </div>
     );
   }
@@ -90,107 +108,133 @@ const ViewSkillPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <button
-            onClick={handleBack}
-            className="text-gray-600 hover:text-gray-900 p-2 rounded-lg hover:bg-gray-100"
-          >
-            <Icon icon="heroicons:arrow-left-20-solid" className="w-5 h-5" />
-          </button>
-          <h1 className="text-md font-bold text-gray-900 font-poppins">View Skill</h1>
-        </div>
-        <Button
-          variant="primary"
-          size="md"
-          className="flex items-center gap-2 bg-[#1A73E8] hover:bg-blue-700"
-          onClick={handleEdit}
+      <div className="flex items-center gap-4">
+        <button
+          onClick={handleCancel}
+          className="p-2 hover:bg-gray-100 rounded"
         >
-          <Icon icon="heroicons:pencil-20-solid" className="w-4 h-4" />
+          <Icon icon="heroicons:arrow-left-20-solid" className="w-5 h-5" />
+        </button>
+        <h1 className="text-md font-bold text-gray-900 font-poppins">
           Edit Skill
-        </Button>
+        </h1>
       </div>
 
-      {/* Skill Details */}
-      <div className="bg-white p-6 border border-gray-200 rounded-lg">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Title */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Title
-            </label>
-            <p className="text-lg font-semibold text-gray-900 font-dmSans">{skill.title}</p>
+      {/* Form */}
+      <div className="bg-white p-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Left */}
+            <div className="flex flex-col gap-4 p-6 border border-gray-border-darker">
+              <div>
+                <label className="block text-sm font-medium mb-2">Title *</label>
+                <input
+                  name="title"
+                  value={formData.title}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Priority</label>
+                <input
+                  type="number"
+                  name="priority"
+                  value={formData.priority}
+                  onChange={handleInputChange}
+                  min={1}
+                  max={10}
+                  className="w-full px-3 py-2 border"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Description *</label>
+                <textarea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleInputChange}
+                  rows={4}
+                  className="w-full px-3 py-2 border"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Slug *</label>
+                <input
+                  name="slug"
+                  value={formData.slug}
+                  onChange={handleInputChange}
+                  required
+                  className="w-full px-3 py-2 border"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Status *</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Right SEO */}
+            <div className="flex flex-col gap-4 p-6 border border-gray-border-darker">
+              <h6 className="font-bold border-b pb-2">SEO Section</h6>
+
+              <input
+                name="seo_title"
+                value={formData.seo_title}
+                onChange={handleInputChange}
+                placeholder="SEO Title"
+                className="px-3 py-2 border"
+              />
+
+              <textarea
+                name="seo_description"
+                value={formData.seo_description}
+                onChange={handleInputChange}
+                rows={3}
+                placeholder="SEO Description"
+                className="px-3 py-2 border"
+              />
+
+              <input
+                name="seo_keywords"
+                value={formData.seo_keywords}
+                onChange={handleInputChange}
+                placeholder="SEO Keywords"
+                className="px-3 py-2 border"
+              />
+            </div>
           </div>
 
-          {/* Priority */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Priority
-            </label>
-            <span className={`inline-flex text-emerald-500 px-3 py-1 text-xs font-regular  rounded-full ${getPriorityColor(skill.priority)}`}>
-              {skill.priority}
-            </span>
+          {error && (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3">
+              {error}
+            </div>
+          )}
+
+          <div className="flex justify-end gap-4">
+            <Button type="button" variant="secondary" onClick={handleCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={loading}>
+              {loading ? "Updating..." : "Update Skill"}
+            </Button>
           </div>
-        </div>
-
-        {/* Description */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Description
-          </label>
-          <p className="text-gray-700 font-dmSans whitespace-pre-wrap">{skill.description}</p>
-        </div>
-
-        {/* Slug */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Slug
-          </label>
-          <p className="text-gray-700 font-dmSans">{skill.slug}</p>
-        </div>
-
-        {/* SEO Title */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            SEO Title
-          </label>
-          <p className="text-gray-700 font-dmSans">{skill.seo_title || 'Not set'}</p>
-        </div>
-
-        {/* SEO Description */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            SEO Description
-          </label>
-          <p className="text-gray-700 font-dmSans whitespace-pre-wrap">{skill.seo_description || 'Not set'}</p>
-        </div>
-
-        {/* SEO Keywords */}
-        <div className="mt-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            SEO Keywords
-          </label>
-          <p className="text-gray-700 font-dmSans">{skill.seo_keywords || 'Not set'}</p>
-        </div>
-
-        {/* Timestamps */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Created At
-            </label>
-            <p className="text-gray-700 font-dmSans">{formatDate(skill.created_at)}</p>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Updated At
-            </label>
-            <p className="text-gray-700 font-dmSans">{formatDate(skill.updated_at)}</p>
-          </div>
-        </div>
+        </form>
       </div>
     </div>
   );
 };
 
-export default ViewSkillPage;
+export default EditSkillPage;
