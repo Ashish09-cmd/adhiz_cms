@@ -167,6 +167,19 @@ const SkillsPage: React.FC = () => {
     setShowViewModal(true);
   };
 
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "-";
+
+    // Convert "YYYY-MM-DD HH:mm:ss.SSS+TZ" → ISO format
+    const isoDate = dateString.replace(" ", "T");
+
+    const date = new Date(isoDate);
+
+    if (isNaN(date.getTime())) return "-";
+
+    return date.toISOString().split("T")[0]; // YYYY-MM-DD
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -364,7 +377,7 @@ const SkillsPage: React.FC = () => {
                   </td>
 
                   <td className="px-6 py-4 border border-[#ddd] whitespace-nowrap text-sm font-medium text-gray-700">
-                    {new Date(skill.created_at).toLocaleDateString()}
+                    {formatDate(skill.updated_at)}
                   </td>
 
                   <td className="px-6 py-4 border border-[#ddd]">
@@ -524,12 +537,12 @@ const SkillsPage: React.FC = () => {
 
               <div>
                 <span className="font-semibold">Created At:</span>{" "}
-                {new Date(selectedSkill.created_at).toLocaleString()}
+                {formatDate(selectedSkill.created_at)}
               </div>
 
               <div>
                 <span className="font-semibold">Updated At:</span>{" "}
-                {new Date(selectedSkill.updated_at).toLocaleString()}
+                {formatDate(selectedSkill.updated_at)}
               </div>
             </div>
 
@@ -538,7 +551,7 @@ const SkillsPage: React.FC = () => {
               <Button
                 variant="secondary"
                 onClick={() => setShowViewModal(false)}
-              >
+              > 
                 Close
               </Button>
             </div>
@@ -550,5 +563,3 @@ const SkillsPage: React.FC = () => {
 };
 
 export default SkillsPage;
-
-
