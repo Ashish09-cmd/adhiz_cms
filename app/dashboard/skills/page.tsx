@@ -167,19 +167,6 @@ const SkillsPage: React.FC = () => {
     setShowViewModal(true);
   };
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "-";
-
-    // Convert "YYYY-MM-DD HH:mm:ss.SSS+TZ" → ISO format
-    const isoDate = dateString.replace(" ", "T");
-
-    const date = new Date(isoDate);
-
-    if (isNaN(date.getTime())) return "-";
-
-    return date.toISOString().split("T")[0]; // YYYY-MM-DD
-  };
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -347,9 +334,6 @@ const SkillsPage: React.FC = () => {
                 </th>
 
                 <th className="px-6 py-3 border border-[#ddd] text-left text-xs font-bold text-primary-title  capatalize tracking-wider">
-                  Updated At
-                </th>
-                <th className="px-6 py-3 border border-[#ddd] text-left text-xs font-bold text-primary-title  capatalize tracking-wider">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left border border-[#ddd] text-xs font-bold text-primary-title  capatalize tracking-wider">
@@ -374,10 +358,6 @@ const SkillsPage: React.FC = () => {
 
                   <td className="px-6 py-4 border border-[#ddd] whitespace-nowrap text-sm font-medium text-gray-700">
                     {truncateDescription(skill.description)}
-                  </td>
-
-                  <td className="px-6 py-4 border border-[#ddd] whitespace-nowrap text-sm font-medium text-gray-700">
-                    {formatDate(skill.updated_at)}
                   </td>
 
                   <td className="px-6 py-4 border border-[#ddd]">
@@ -534,16 +514,6 @@ const SkillsPage: React.FC = () => {
                   {selectedSkill.seo_description}
                 </p>
               </div>
-
-              <div>
-                <span className="font-semibold">Created At:</span>{" "}
-                {formatDate(selectedSkill.created_at)}
-              </div>
-
-              <div>
-                <span className="font-semibold">Updated At:</span>{" "}
-                {formatDate(selectedSkill.updated_at)}
-              </div>
             </div>
 
             {/* Footer */}
@@ -551,7 +521,7 @@ const SkillsPage: React.FC = () => {
               <Button
                 variant="secondary"
                 onClick={() => setShowViewModal(false)}
-              > 
+              >
                 Close
               </Button>
             </div>
