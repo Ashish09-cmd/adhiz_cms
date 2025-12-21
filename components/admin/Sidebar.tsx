@@ -64,7 +64,6 @@ const Sidebar: React.FC = () => {
       slug: "admin/tag-management",
       icon: "fa:tags",
       dropicon: "iconoir:nav-arrow-down",
-
     },
     {
       category: "Skills",
@@ -119,6 +118,12 @@ const Sidebar: React.FC = () => {
         "Footer",
         "Bottom Bar",
       ],
+      icon: "mdi:image-size-select-large",
+      dropicon: "iconoir:nav-arrow-down",
+    },
+    {
+      category: "Media",
+      items: ["List", "Add"],
       icon: "mdi:image-size-select-large",
       dropicon: "iconoir:nav-arrow-down",
     },

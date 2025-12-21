@@ -4,6 +4,8 @@ import React, { useEffect, useState } from "react";
 import { Icon } from "@iconify/react";
 import api from "@/lib/axios";
 import { Button } from "../../../components/ui/Button";
+import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 
 interface Skill {
   id: string;
@@ -19,6 +21,8 @@ interface Skill {
 }
 
 const SkillsPage: React.FC = () => {
+  const router = useRouter();
+
   const [skills, setSkills] = useState<Skill[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,17 +37,14 @@ const SkillsPage: React.FC = () => {
   );
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [selectedSkill, setSelectedSkill] = useState<Skill | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
 
   const [showFilterPopover, setShowFilterPopover] = useState(false);
 
   const [unsavedFilter, setUnsavedFilter] = useState(statusFilter);
-  const itemsPerPage = 10;
 
   // Fetch skills
   const fetchSkills = async () => {
@@ -57,7 +58,7 @@ const SkillsPage: React.FC = () => {
           : null;
 
       if (!token) {
-        window.location.href = "/login";
+        router.push("/login");
         return;
       }
 
@@ -65,17 +66,35 @@ const SkillsPage: React.FC = () => {
       const data: Skill[] = res.data.data || res.data;
       setSkills(data);
       setFilteredSkills(data);
-    } catch (err: any) {
-      console.error(err);
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string; error?: string }>;
+      console.error(error);
       setError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
+        error.response?.data?.message ||
+          error.response?.data?.error ||
           "Failed to load skills"
       );
     } finally {
       setLoading(false);
     }
   };
+
+  /* ================= SEARCH FILTER ================= */
+  useEffect(() => {
+    if (!search.trim()) {
+      setFilteredSkills(skills);
+      return;
+    }
+
+    const term = search.toLowerCase();
+    setFilteredSkills(
+      skills.filter(
+        (skill) =>
+          skill.title.toLowerCase().includes(term) ||
+          skill.slug.toLowerCase().includes(term)
+      )
+    );
+  }, [search, skills]);
 
   // confirm delete api call
 
@@ -98,10 +117,11 @@ const SkillsPage: React.FC = () => {
 
       setShowDeleteModal(false);
       setSelectedSkill(null);
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string; error?: string }>;
       alert(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
+        error.response?.data?.message ||
+          error.response?.data?.error ||
           "Failed to delete skill"
       );
     } finally {
@@ -132,29 +152,14 @@ const SkillsPage: React.FC = () => {
     setFilteredSkills(filtered);
   }, [search, statusFilter, skills]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    setCurrentPage(1);
-    fetchSkills();
-  };
-
   const handleAddSkill = () => {
-    window.location.href = "/dashboard/skills/add";
-  };
-
-  //
-  const handleEditSkill = () => {
-    window.location.href = "";
+    router.push("/dashboard/skills/add");
   };
 
   const truncateDescription = (description: string, maxLength: number = 50) => {
     return description.length > maxLength
       ? description.substring(0, maxLength) + "..."
       : description;
-  };
-
-  const getSkillStatus = (skill: Skill) => {
-    return skill.priority >= 5 ? "active" : "inactive";
   };
 
   const handleDeleteClick = (skill: Skill) => {
@@ -170,16 +175,6 @@ const SkillsPage: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      {/* <div className="flex items-center justify-between">
-        <h1 className="text-md font-bold text-gray-900 font-poppins">
-          Skills
-        </h1>
-
-        <Button onClick={handleAddSkill} className="flex items-center gap-2">
-          <Icon icon="heroicons:plus-20-solid" className="w-4 h-4" />
-          Add Skill
-        </Button>
-      </div> */}
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900 font-poppins">
           Skills List
@@ -195,29 +190,18 @@ const SkillsPage: React.FC = () => {
         </Button>
       </div>
 
+      {/* Searching */}
       <div className="bg-white p-4 border border-gray-200 rounded-lg flex items-center gap-4">
-        <form onSubmit={handleSearch} className="flex-1 flex gap-4">
-          <input
-            type="text"
-            placeholder="Search by title..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-
-          <Button
-            type="submit"
-            variant="secondary"
-            size="md"
-            className="flex items-center gap-2 cursor-pointer"
-          >
-            <Icon
-              icon="heroicons:magnifying-glass-20-solid"
-              className="w-4 h-4"
-            />
-            Search
-          </Button>
-        </form>
+        <input
+          type="text"
+          placeholder="Search by title or slug..."
+          value={search}
+          onChange={(e) => {
+            setSearch(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
 
         {/* Filter Button */}
         <div className="relative">
@@ -246,7 +230,11 @@ const SkillsPage: React.FC = () => {
                 </label>
                 <select
                   value={unsavedFilter}
-                  onChange={(e) => setUnsavedFilter(e.target.value as any)}
+                  onChange={(e) =>
+                    setUnsavedFilter(
+                      e.target.value as "all" | "active" | "inactive"
+                    )
+                  }
                   className="w-full border border-gray-300 rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="">Any</option>
@@ -258,17 +246,22 @@ const SkillsPage: React.FC = () => {
               <div className="flex justify-end gap-2">
                 <button
                   className="px-3 py-1 border rounded-md bg-gray-100 hover:bg-gray-200"
-                  // onClick={() => setUnsavedFilter("")}
+                  onClick={() => {
+                    setUnsavedFilter("all"); // Reset the dropdown to "Any"
+                    setStatusFilter("all"); // Reset the applied filter
+                    setShowFilterPopover(false); // Close the popover
+                    setCurrentPage(1); // Reset pagination if you have it
+                  }}
                 >
                   Reset
                 </button>
+
                 <button
                   className="px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700"
                   onClick={() => {
-                    setStatusFilter(unsavedFilter);
+                    setStatusFilter(unsavedFilter || "all");
                     setShowFilterPopover(false);
                     setCurrentPage(1);
-                    fetchSkills();
                   }}
                 >
                   Apply
@@ -343,7 +336,7 @@ const SkillsPage: React.FC = () => {
             </thead>
 
             <tbody className="bg-white divide-y divide-gray-200">
-              {skills.map((skill) => (
+              {filteredSkills.map((skill) => (
                 <tr
                   key={skill.id}
                   className="border-b hover:bg-gray-50 transition"
@@ -361,21 +354,19 @@ const SkillsPage: React.FC = () => {
                   </td>
 
                   <td className="px-6 py-4 border border-[#ddd]">
-                    {" "}
                     <div className="relative group inline-block">
                       <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold  cursor-default ${
-                          getSkillStatus(skill) === "active"
-                            ? " text-green-800"
-                            : " text-gray-800"
+                        className={`inline-flex px-2 py-1 text-xs font-semibold cursor-default ${
+                          skill.status === "active"
+                            ? "text-green-800"
+                            : "text-gray-800"
                         }`}
                       >
-                        {getSkillStatus(skill) === "active"
-                          ? "Active"
-                          : "Inactive"}
+                        {skill.status === "active" ? "Active" : "Inactive"}
                       </span>
+
                       <div className="absolute bottom-full mb-1 left-1/2 transform -translate-x-1/2 scale-0 group-hover:scale-100 transition-transform bg-gray-700 text-white text-xs rounded px-2 py-1 whitespace-nowrap">
-                        {getSkillStatus(skill)}
+                        {skill.status}
                       </div>
                     </div>
                   </td>
@@ -394,7 +385,7 @@ const SkillsPage: React.FC = () => {
                       </button>
                       <button
                         onClick={() =>
-                          (window.location.href = `/dashboard/skills/edit/${skill.slug}`)
+                          router.push(`/dashboard/skills/edit/${skill.slug}`)
                         }
                         className="text-green-600 cursor-pointer hover:text-green-900 p-1 rounded"
                         title="Edit"

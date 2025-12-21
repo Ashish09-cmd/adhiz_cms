@@ -4,8 +4,8 @@ import React, { useState } from "react";
 import { Icon } from "@iconify/react";
 import { Button } from "../../../../components/ui/Button";
 import { useRouter } from "next/navigation";
-import RichTextEditor from "@/components/ui/Editor";
 import api from "@/lib/axios"; // Axios instance
+import { AxiosError } from "axios";
 
 const AddSkillPage: React.FC = () => {
   const router = useRouter();
@@ -55,15 +55,14 @@ const AddSkillPage: React.FC = () => {
 
       // Success → redirect to skills list
       router.push("/dashboard/skills");
-    } catch (err: any) {
-      console.error(err);
-      // Axios error handling
-      const msg =
-        err.response?.data?.message ||
-        err.response?.data?.error ||
-        err.message ||
-        "Failed to create skill";
-      setError(msg);
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string; error?: string }>;
+      console.error(error);
+      setError(
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to add skills"
+      );
     } finally {
       setLoading(false);
     }

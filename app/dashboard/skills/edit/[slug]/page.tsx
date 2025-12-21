@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import api from "@/lib/axios";
 import { Button } from "@/components/ui/Button";
 import { Icon } from "@iconify/react";
+import { AxiosError } from "axios";
 
 interface SkillForm {
   id: string;
@@ -12,6 +13,8 @@ interface SkillForm {
   slug: string;
   priority: number;
   description: string;
+  status: "active" | "inactive";
+
   seo_title: string;
   seo_description: string;
   seo_keywords: string;
@@ -23,9 +26,10 @@ const EditSkillPage: React.FC = () => {
 
   const [form, setForm] = useState<SkillForm | null>(null);
   const [loading, setLoading] = useState(true);
-  const [spinerLoading , setSpinerLoading] = useState (false);
+  const [spinerLoading, setSpinerLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [slugTouched, setSlugTouched] = useState(false);
 
   /* ----------------------------------------
    Fetch skill by slug
@@ -35,31 +39,27 @@ const EditSkillPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      const res = await api.get(`/skills`);
-      const skills = res.data.data || res.data;
-
-      const skill = skills.find((s: any) => s.slug === slug);
-
-      if (!skill) {
-        setError("Skill not found");
-        return;
-      }
+      const res = await api.get(`/skills/slug/${slug}`);
+      const skill = res.data.data ?? res.data;
 
       setForm({
         id: skill.id,
         title: skill.title,
         slug: skill.slug,
-        priority: skill.priority,
-        description: skill.description,
-        seo_title: skill.seo_title || "",
-        seo_description: skill.seo_description || "",
-        seo_keywords: skill.seo_keywords || "",
+        priority: Number(skill.priority) || 1,
+        description: skill.description ?? "",
+        status: skill.status === "inactive" ? "inactive" : "active",
+        seo_title: skill.seo_title ?? "",
+        seo_description: skill.seo_description ?? "",
+        seo_keywords: skill.seo_keywords ?? "",
       });
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string; error?: string }>;
+      console.error(error);
       setError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Failed to load skill"
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to load skills"
       );
     } finally {
       setLoading(false);
@@ -70,11 +70,24 @@ const EditSkillPage: React.FC = () => {
     fetchSkill();
   }, [slug]);
 
+  /* -------------------------------
+     Slug generator
+  ------------------------------- */
+  const generateSlug = (value: string) => {
+    return value
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+  };
+
   /* ----------------------------------------
    Handle input change
   ----------------------------------------- */
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
   ) => {
     if (!form) return;
     const { name, value } = e.target;
@@ -85,6 +98,33 @@ const EditSkillPage: React.FC = () => {
     });
   };
 
+  /* -------------------------------
+     Handle title change → auto-update slug
+  ------------------------------- */
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (!form) return;
+
+    setForm({
+      ...form,
+      title: value,
+      slug: slugTouched ? form.slug : generateSlug(value), // only update slug if not manually touched
+    });
+  };
+
+  /* -------------------------------
+     Handle manual slug change
+  ------------------------------- */
+  const handleSlugChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSlugTouched(true);
+    if (!form) return;
+
+    setForm({
+      ...form,
+      slug: value,
+    });
+  };
   /* ----------------------------------------
    Update skill
   ----------------------------------------- */
@@ -100,16 +140,18 @@ const EditSkillPage: React.FC = () => {
         slug: form.slug,
         priority: form.priority,
         description: form.description,
+        status: form.status,
         seo_title: form.seo_title,
         seo_description: form.seo_description,
         seo_keywords: form.seo_keywords,
       });
 
       router.push("/dashboard/skills");
-    } catch (err: any) {
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string; error?: string }>;
       alert(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
+        error.response?.data?.message ||
+          error.response?.data?.error ||
           "Failed to update skill"
       );
     } finally {
@@ -120,7 +162,7 @@ const EditSkillPage: React.FC = () => {
   /* ----------------------------------------
    UI states
   ----------------------------------------- */
-   if (loading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center  h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
@@ -137,7 +179,7 @@ const EditSkillPage: React.FC = () => {
   }
 
   const handleAddSkill = () => {
-    window.location.href = "/dashboard/skills/add";
+    router.push("/dashboard/skills/add");
   };
 
   /* ----------------------------------------
@@ -155,7 +197,7 @@ const EditSkillPage: React.FC = () => {
             <Icon icon="heroicons:arrow-left-20-solid" className="w-5 h-5" />
           </button>
           <h1 className="text-md font-bold text-gray-900 font-poppins">
-            Add New Skill
+            Edit Skill
           </h1>
         </div>
         <div className="flex items-center gap-2">
@@ -210,7 +252,7 @@ const EditSkillPage: React.FC = () => {
                   id="title"
                   name="title"
                   value={form.title}
-                  onChange={handleChange}
+                  onChange={handleTitleChange}
                   required
                   className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                   placeholder="Enter skill title"
@@ -225,11 +267,11 @@ const EditSkillPage: React.FC = () => {
                   Priority
                 </label>
                 <input
-                  type="text"
+                  type="number"
                   id="priority"
                   name="priority"
                   value={form.priority}
-                  onChange={handleChange}
+                  onChange={handleSlugChange}
                   min={1}
                   max={10}
                   className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
@@ -283,8 +325,8 @@ const EditSkillPage: React.FC = () => {
                 <select
                   id="status"
                   name="status"
-                  // value={formData.status}
-                  // onChange={handleInputChange}
+                  value={form.status}
+                  onChange={handleChange}
                   className="w-full px-3 py-2 border border-gray-300 focus:outline-none"
                 >
                   <option value="active">Active</option>
@@ -370,19 +412,14 @@ const EditSkillPage: React.FC = () => {
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={loading}
-              className="flex items-center gap-2"
-            >
-              {loading && (
+            <Button type="submit" variant="primary" disabled={saving}>
+              {saving && (
                 <Icon
                   icon="heroicons:arrow-path-20-solid"
-                  className="w-4 h-4 animate-spin"
+                  className="bg-blue-600 text-white"
                 />
               )}
-              {loading ? "Creating..." : "Create Skill"}
+              {saving ? "Updating..." : "Update Skill"}
             </Button>
           </div>
         </form>
