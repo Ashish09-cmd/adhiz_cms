@@ -192,7 +192,7 @@ const SkillsPage: React.FC = () => {
             variant="primary"
             size="md"
             className="flex items-center gap-2 bg-green-600 text-xs  text-white cursor-pointer"
-            onClick={() => (window.location.href = "/dashboard/skills/add")}
+            onClick={() => (window.location.href = "/dashboard/slider/add")}
           >
             <Icon icon="akar-icons:edit" className="w-4 h-4" />
             Add
@@ -305,7 +305,7 @@ const SkillsPage: React.FC = () => {
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead className="bg-gray-50 border-b border-gray-200">
+            <thead className="bg-gray-50 border-b">
               <tr>
                 <th
                   className="px-6 py-3 border border-[#ddd] text-left text-xs font-bold text-primary-title  capatalize tracking-wider cursor-pointer"
