@@ -33,6 +33,8 @@ const BannersPage: React.FC = () => {
   const [unsavedFilter, setUnsavedFilter] = useState(statusFilter);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const [open, setOpen] = useState(false);
+
 
   const { id } = useParams<{ id: string }>();
   // ---------------- FETCH ----------------
@@ -48,7 +50,7 @@ const BannersPage: React.FC = () => {
           page: currentPage,
         },
       });
-      
+
       const data: Banner[] = res.data.data || res.data;
       setBanners(data);
 

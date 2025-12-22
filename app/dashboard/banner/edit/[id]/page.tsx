@@ -123,11 +123,11 @@ const UpdateBannerPage: React.FC = () => {
     <div className="max-w-3xl space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => router.back()} className="text-gray-600">
-          <Icon icon="heroicons:arrow-left-20-solid" />
+        <button onClick={() => router.back()} className="text-gray-800 cursor-pointer hover:text-gray-900 p-2 hover:bg-gray-100">
+          <Icon icon="heroicons:arrow-left-20-solid" className="h-5 w-5" />
         </button>
         <h1 className="text-2xl font-bold text-gray-900 font-poppins">
-          Update Banner
+          Edit Banner
         </h1>
       </div>
 

@@ -248,12 +248,12 @@ const Sidebar: React.FC = () => {
                       //  home page slider
                       if (category.category === "home page slider") {
                         if (item === "List") {
-                          return `/dashboard/slider`;
+                          return `/dashboard/banner`;
                         }
                         const itemSlug = item
                           .toLowerCase()
                           .replace(/\s+/g, "-");
-                        return `/dashboard/slider/${itemSlug}`;
+                        return `/dashboard/banner/${itemSlug}`;
                       }
 
                       //Course Section
