@@ -6,6 +6,7 @@ import { Icon } from "@iconify/react";
 import api from "@/lib/axios";
 import { Button } from "../../../../../components/ui/Button";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 
 /* ================= TYPES ================= */
 interface Tag {
@@ -49,12 +50,12 @@ const EditTagPage: React.FC = () => {
       setTag(data);
       setTagName(data.tag_name);
       setSlug(data.slug);
-    } catch (err: any) {
-      console.error(err);
-      setError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Failed to load tag"
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string; error?: string }>;
+      alert(
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to load skill"
       );
     } finally {
       setLoading(false);
@@ -92,12 +93,12 @@ const EditTagPage: React.FC = () => {
       });
 
       router.push("/dashboard/tags");
-    } catch (err: any) {
-      console.error(err);
-      setError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Failed to update tag"
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string; error?: string }>;
+      alert(
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to update skill"
       );
     } finally {
       setSaving(false);

@@ -5,6 +5,7 @@ import { Icon } from "@iconify/react";
 import api from "@/lib/axios";
 import { Button } from "../../../../components/ui/Button";
 import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
 
 /* ================= COMPONENT ================= */
 const AddTagPage: React.FC = () => {
@@ -49,12 +50,12 @@ const AddTagPage: React.FC = () => {
 
       // Redirect after success
       router.push("/dashboard/tags");
-    } catch (err: any) {
-      console.error(err);
-      setError(
-        err.response?.data?.message ||
-          err.response?.data?.error ||
-          "Failed to create tag"
+    } catch (err) {
+      const error = err as AxiosError<{ message?: string; error?: string }>;
+      alert(
+        error.response?.data?.message ||
+          error.response?.data?.error ||
+          "Failed to create skill"
       );
     } finally {
       setLoading(false);
