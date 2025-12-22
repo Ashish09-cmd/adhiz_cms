@@ -267,6 +267,7 @@ const Sidebar: React.FC = () => {
                         return `/dashboard/courses/${itemSlug}`;
                       }
 
+                      //Tag
                       if (category.category === "Tag Management") {
                         if (item === "List") {
                           return `/dashboard/tags`;
@@ -275,6 +276,17 @@ const Sidebar: React.FC = () => {
                           .toLowerCase()
                           .replace(/\s+/g, "-");
                         return `/dashboard/tags/${itemSlug}`;
+                      }
+
+                      //Media
+                      if (category.category === "Media") {
+                        if (item === "List") {
+                          return `/dashboard/media`;
+                        }
+                        const itemSlug = item
+                          .toLowerCase()
+                          .replace(/\s+/g, "-");
+                        return `/dashboard/media/${itemSlug}`;
                       }
 
                       // Add similar logic for other categories as needed
